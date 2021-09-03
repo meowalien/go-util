@@ -1,4 +1,4 @@
-module github.com/meowalien/tools
+module github.com/meowalien/go-util
 
 go 1.16
 
