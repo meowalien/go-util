@@ -1,9 +1,11 @@
-package go_util
+package text
 
 import (
 	"fmt"
 	"regexp"
 )
+const AllASCII = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLM_NOPQRSTUVWXYZ[\\]^`abcdefghijklmnopqrstuvwxyz{|}~"
+const AllASCIICount = 95
 
 const (
 	Reset ColorCode = iota

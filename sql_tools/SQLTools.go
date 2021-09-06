@@ -1,16 +1,10 @@
-package go_util
+package sql_tools
 
 import (
 	"database/sql/driver"
 	"encoding/json"
 	"errors"
 )
-
-//func SQLJsonAble(v interface{}) JsonTypeStruct  {
-//	return JsonTypeStruct{
-//		Thing: v,
-//	}
-//}
 
 // JsonTypeStruct provide a simple solution
 // to make struct use as Json in SQL query

@@ -1,4 +1,4 @@
-package go_util
+package json
 
 import (
 	"encoding/json"

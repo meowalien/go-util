@@ -3,7 +3,7 @@ package logger
 import (
 	"fmt"
 	"github.com/kr/pretty"
-	"github.com/meowalien/go-util"
+	"github.com/meowalien/go-util/text"
 	"io"
 	"log"
 	"os"
@@ -22,11 +22,11 @@ const (
 
 var LogLevelMask = ALL
 
-var InfoColor = go_util.FgGreen
-var DebugColor = go_util.FgBlue
-var WaringColor = go_util.FgYellow
-var ErrorColor = go_util.FgRed
-var TempColor = go_util.FgCyan
+var InfoColor = text.FgGreen
+var DebugColor = text.FgBlue
+var WaringColor = text.FgYellow
+var ErrorColor = text.FgRed
+var TempColor = text.FgCyan
 var TempLogOpen = true
 
 
@@ -46,14 +46,14 @@ type LoggerWrapper struct {
 type Logger struct {
 	IsMute bool
 	log.Logger
-	Color go_util.ColorCode
+	Color text.ColorCode
 }
 
 func (l *Logger) PrettyPrintln(v ...interface{}) {
 	l.Println(pretty.Sprint(v...))
 }
 
-func (l *Logger) SetColor(color go_util.ColorCode) {
+func (l *Logger) SetColor(color text.ColorCode) {
 	l.Color = color
 }
 
@@ -61,7 +61,7 @@ func (l *Logger) Output(calldepth int, s string) error {
 	if l.IsMute {
 		return nil
 	}
-	return l.Output(calldepth+1, go_util.ColorSting(s, l.Color))
+	return l.Output(calldepth+1, text.ColorSting(s, l.Color))
 }
 
 
@@ -72,7 +72,7 @@ func (l *LoggerWrapper) TempLog() *Logger {
 		if !TempLogOpen {
 			return CreateMuteLogger()
 		}
-		l.tempLogger = &Logger{false,*log.New(os.Stdout, go_util.ColorSting("TEMP_LOG: ", TempColor), log.Ltime|log.Ldate|log.Lshortfile|log.Lmsgprefix), TempColor}
+		l.tempLogger = &Logger{false,*log.New(os.Stdout, text.ColorSting("TEMP_LOG: ", TempColor), log.Ltime|log.Ldate|log.Lshortfile|log.Lmsgprefix), TempColor}
 	}
 	return l.tempLogger
 }
@@ -81,10 +81,10 @@ func (l *LoggerWrapper) TempLog() *Logger {
 
 type Setting struct {
 	LogLevelMask uint8
-	DebugColor   go_util.ColorCode
-	WaringColor  go_util.ColorCode
-	ErrorColor   go_util.ColorCode
-	TempColor    go_util.ColorCode
+	DebugColor   text.ColorCode
+	WaringColor  text.ColorCode
+	ErrorColor   text.ColorCode
+	TempColor    text.ColorCode
 	TempLogOpen  bool
 }
 
@@ -145,7 +145,7 @@ func NewMuteLoggerWrapper() *LoggerWrapper {
 
 // CreateMuteLogger create a Mute Logger, the mute logger will do nothing when used.
 func CreateMuteLogger() *Logger {
-	return &Logger{true ,*log.Default(),go_util.FgBlack}
+	return &Logger{true ,*log.Default(), text.FgBlack}
 }
 
 // CreateErrorLogger create an Error Logger.
@@ -174,7 +174,7 @@ func CreateInfoLogger(prefix string,logfile string) *Logger {
 
 
 
-func CreateLogger(prefix string,logfile string , color go_util.ColorCode) *Logger {
+func CreateLogger(prefix string,logfile string , color text.ColorCode) *Logger {
 	var writer io.Writer
 	if logfile != ""{
 		outputFile, err := os.OpenFile(logfile , os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
@@ -185,5 +185,5 @@ func CreateLogger(prefix string,logfile string , color go_util.ColorCode) *Logge
 	}else{
 		writer = io.Discard
 	}
-	return &Logger{false,*log.New(writer, fmt.Sprintf(go_util.ColorSting("%s: ", color), prefix), log.Ltime|log.Ldate|log.Lshortfile|log.Lmsgprefix), color}
+	return &Logger{false,*log.New(writer, fmt.Sprintf(text.ColorSting("%s: ", color), prefix), log.Ltime|log.Ldate|log.Lshortfile|log.Lmsgprefix), color}
 }

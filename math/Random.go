@@ -1,4 +1,4 @@
-package go_util
+package math
 
 import (
 	"github.com/bwmarrin/snowflake"

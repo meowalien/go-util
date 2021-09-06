@@ -1,6 +1,7 @@
-package go_util
+package password
 
 import (
+	"github.com/meowalien/go-util/math"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -18,7 +19,7 @@ func HashPassword(password string, pepper string,saltLength int) (string, string
 	if saltLength <= 0 {
 		panic("The salt length should not be less than or equal to 0")
 	}
-	randomSalt := RandomString(saltLength)
+	randomSalt := math.RandomString(saltLength)
 	p := append([]byte(password), pepper+randomSalt...)
 	bytes, err := bcrypt.GenerateFromPassword(p, bcrypt.DefaultCost)
 	return string(bytes), randomSalt, err

@@ -1,4 +1,4 @@
-package go_util
+package router
 
 const DEFULT_CHAN_SIZE = 1
 const MaximumBroadcastThreads = 1000
