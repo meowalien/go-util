@@ -1,4 +1,4 @@
-package util
+package go_util
 
 // Point2D represents a coordinate point in 2D
 type Point2D struct {

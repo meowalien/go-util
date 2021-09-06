@@ -1,4 +1,4 @@
-package util
+package go_util
 
 import (
 	"github.com/bwmarrin/snowflake"

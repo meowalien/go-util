@@ -1,4 +1,4 @@
-package util
+package go_util
 
 import (
 	"fmt"
@@ -76,23 +76,3 @@ func ColorSting(s string, color ColorCode) string {
 //var englishLetter = []rune(AllASCII)
 
 var PlainEnglishOnlyRegexp = regexp.MustCompile(fmt.Sprintf(`^[%s%s]+$`, AllASCII, "_"))
-
-//
-//func PlainEnglishAndNumberOnly(s string) bool {
-//loop: for _, letterRune := range englishLetter {
-//	for _, i2 := range s {
-//		if i2 == letterRune {
-//			continue loop
-//		}
-//	}
-//}
-//	return false
-//}
-//
-//func RandStringRunes(n int) string {
-//	b := make([]rune, n)
-//	for i := range b {
-//		b[i] = englishLetter[rand.Intn(len(englishLetter))]
-//	}
-//	return string(b)
-//}

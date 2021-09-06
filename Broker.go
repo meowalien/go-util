@@ -1,4 +1,4 @@
-package util
+package go_util
 
 const DEFULT_CHAN_SIZE = 1
 const MaximumBroadcastThreads = 1000
