@@ -20,7 +20,7 @@ const (
 	ALL  = ^MUTE
 )
 
-var LogLevelMask uint8
+var LogLevelMask = ALL
 
 var InfoColor = go_util.FgGreen
 var DebugColor = go_util.FgBlue
@@ -56,21 +56,6 @@ func (l *Logger) PrettyPrintln(v ...interface{}) {
 func (l *Logger) SetColor(color go_util.ColorCode) {
 	l.Color = color
 }
-
-//// Printf will color the text and act like log.Printf()
-//func (l *Logger) Printf(format string, v ...interface{}) {
-//	_ = l.Output(2, fmt.Sprintf(go_util.ColorSting(format, l.Color), v...))
-//}
-//
-//// Print will color the text and act like log.Print()
-//func (l *Logger) Print(v ...interface{}) {
-//	_ = l.Output(2, go_util.ColorSting(fmt.Sprint(v...), l.Color))
-//}
-//
-//// Println will color the text and act like log.Println()
-//func (l *Logger) Println(v ...interface{}) {
-//	_ = l.Output(2, go_util.ColorSting(fmt.Sprint(v...), l.Color))
-//}
 
 func (l *Logger) Output(calldepth int, s string) error {
 	if l.IsMute {
@@ -160,7 +145,7 @@ func NewMuteLoggerWrapper() *LoggerWrapper {
 
 // CreateMuteLogger create a Mute Logger, the mute logger will do nothing when used.
 func CreateMuteLogger() *Logger {
-	return &Logger{true ,log.Logger{},go_util.FgBlack}
+	return &Logger{true ,*log.Default(),go_util.FgBlack}
 }
 
 // CreateErrorLogger create an Error Logger.
