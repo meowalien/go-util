@@ -13,6 +13,7 @@ const (
 	DEBUG uint8 = 1 << iota
 	WARNING
 	ERROR
+	INFO
 )
 const (
 	MUTE = uint8(0)
@@ -43,6 +44,7 @@ type LoggerWrapper struct {
 }
 
 type Logger struct {
+	IsMute bool
 	log.Logger
 	Color go_util.ColorCode
 }
@@ -55,24 +57,29 @@ func (l *Logger) SetColor(color go_util.ColorCode) {
 	l.Color = color
 }
 
-// Printf will color the text and act like log.Printf()
-func (l *Logger) Printf(format string, v ...interface{}) {
-	_ = l.Output(2, fmt.Sprintf(go_util.ColorSting(format, l.Color), v...))
-}
-
-// Print will color the text and act like log.Print()
-func (l *Logger) Print(v ...interface{}) {
-	_ = l.Output(2, go_util.ColorSting(fmt.Sprint(v...), l.Color))
-}
-
-// Println will color the text and act like log.Println()
-func (l *Logger) Println(v ...interface{}) {
-	_ = l.Output(2, go_util.ColorSting(fmt.Sprint(v...), l.Color))
-}
+//// Printf will color the text and act like log.Printf()
+//func (l *Logger) Printf(format string, v ...interface{}) {
+//	_ = l.Output(2, fmt.Sprintf(go_util.ColorSting(format, l.Color), v...))
+//}
+//
+//// Print will color the text and act like log.Print()
+//func (l *Logger) Print(v ...interface{}) {
+//	_ = l.Output(2, go_util.ColorSting(fmt.Sprint(v...), l.Color))
+//}
+//
+//// Println will color the text and act like log.Println()
+//func (l *Logger) Println(v ...interface{}) {
+//	_ = l.Output(2, go_util.ColorSting(fmt.Sprint(v...), l.Color))
+//}
 
 func (l *Logger) Output(calldepth int, s string) error {
+	if l.IsMute {
+		return nil
+	}
 	return l.Output(calldepth+1, go_util.ColorSting(s, l.Color))
 }
+
+
 // The TempLog should only use for debug, it will be close if the TempLogOpen parameter is false
 // Se the settings in config/log.config.json
 func (l *LoggerWrapper) TempLog() *Logger {
@@ -80,7 +87,7 @@ func (l *LoggerWrapper) TempLog() *Logger {
 		if !TempLogOpen {
 			return CreateMuteLogger()
 		}
-		l.tempLogger = &Logger{*log.New(os.Stdout, go_util.ColorSting("TEMP_LOG: ", TempColor), log.Ltime|log.Ldate|log.Lshortfile|log.Lmsgprefix), TempColor}
+		l.tempLogger = &Logger{false,*log.New(os.Stdout, go_util.ColorSting("TEMP_LOG: ", TempColor), log.Ltime|log.Ldate|log.Lshortfile|log.Lmsgprefix), TempColor}
 	}
 	return l.tempLogger
 }
@@ -100,15 +107,42 @@ type Setting struct {
 // NewLoggerWrapper Create a new LoggerWrapper with given prefix,
 // The prefix will be print before all log rows
 func NewLoggerWrapper(prefix ,logFilePath string) *LoggerWrapper {
+	var errorLogger , waringLogger , debugLogger , infoLogger *Logger
+
 	if LogLevelMask != MUTE {
 		fmt.Printf("Cteate logger: %s\n", prefix)
+		if LogLevelMask & ERROR != 0{
+			errorLogger = CreateErrorLogger(prefix,logFilePath+"error.log")
+		}else{
+			errorLogger =CreateMuteLogger()
+		}
+
+		if LogLevelMask & WARNING != 0{
+			waringLogger = CreateWaringLogger(prefix,logFilePath+"waring.log")
+		}else{
+			waringLogger =CreateMuteLogger()
+		}
+
+		if LogLevelMask & DEBUG != 0{
+			debugLogger =  CreateDebugLogger(prefix,logFilePath+"debug.log")
+		}else{
+			debugLogger =CreateMuteLogger()
+		}
+
+		if LogLevelMask & INFO  != 0{
+			infoLogger = CreateInfoLogger(prefix,logFilePath+"info.log")
+		}else{
+			infoLogger =CreateMuteLogger()
+		}
+
 		return &LoggerWrapper{
-			ERROR:   CreateErrorLogger(prefix,logFilePath+"error.log"),
-			WARNING: CreateWaringLogger(prefix,logFilePath+"waring.log"),
-			DEBUG:   CreateDebugLogger(prefix,logFilePath+"debug.log"),
-			INFO:   CreateInfoLogger(prefix,logFilePath+"info.log"),
+			ERROR:   errorLogger,
+			WARNING: waringLogger,
+			DEBUG:   debugLogger,
+			INFO:   infoLogger,
 		}
 	} else {
+		fmt.Printf("Logger muted: %s\n",prefix)
 		return NewMuteLoggerWrapper()
 	}
 }
@@ -119,13 +153,14 @@ func NewMuteLoggerWrapper() *LoggerWrapper {
 		ERROR:   CreateMuteLogger(),
 		WARNING: CreateMuteLogger(),
 		DEBUG:   CreateMuteLogger(),
+		INFO:   CreateMuteLogger(),
 	}
 
 }
 
 // CreateMuteLogger create a Mute Logger, the mute logger will do nothing when used.
 func CreateMuteLogger() *Logger {
-	return &Logger{*log.New(io.Discard, "", log.LstdFlags), go_util.FgBlack}
+	return &Logger{true ,log.Logger{},go_util.FgBlack}
 }
 
 // CreateErrorLogger create an Error Logger.
@@ -149,7 +184,7 @@ func CreateDebugLogger(prefix string,logfile string) *Logger {
 // CreateInfoLogger create an Info Logger.
 // Info logger should be used to log a message that will be useful for develop.
 func CreateInfoLogger(prefix string,logfile string) *Logger {
-	return CreateLogger("DEBUG: "+prefix,logfile,InfoColor)
+	return CreateLogger("INFO: "+prefix,logfile,InfoColor)
 }
 
 
@@ -165,5 +200,5 @@ func CreateLogger(prefix string,logfile string , color go_util.ColorCode) *Logge
 	}else{
 		writer = io.Discard
 	}
-	return &Logger{*log.New(writer, fmt.Sprintf(go_util.ColorSting("%s: ", color), prefix), log.Ltime|log.Ldate|log.Lshortfile|log.Lmsgprefix), color}
+	return &Logger{false,*log.New(writer, fmt.Sprintf(go_util.ColorSting("%s: ", color), prefix), log.Ltime|log.Ldate|log.Lshortfile|log.Lmsgprefix), color}
 }
